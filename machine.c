@@ -542,30 +542,15 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
 void test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pairs, int x, int y){
     srand(time(NULL));
 
-    if(x >= 182 && x <= 192 && y >= 56 && y <= 66){
-        if(positions[2] != -1)
-            positions[2] = (positions[2] + 1) % 26;
-    }
-
-    if(x >= 244 && x <= 254 && y >= 56 && y <= 66){
-        if(positions[1] != -1)
-            positions[1] = (positions[1] + 1) % 26;
-    }
-
-    if(x >= 306 && x <= 316 && y >= 56 && y <= 66){
-        if(positions[0] != -1)
-            positions[0] = (positions[0] + 1) % 26;
-    }
-
-    if(x >= 182 && x <= 192 && y >= 132 && y <= 142){
+    if(x >= 172 && x <= 202 && y >= 46 && y <= 76){
         if(positions[2] != -1){
             positions[2] -= 1;
             if(positions[2] < 0)
                 positions[2] += 26;
-        }
+        }   
     }
 
-    if(x >= 244 && x <= 254 && y >= 132 && y <= 142){
+    if(x >= 234 && x <= 264 && y >= 46 && y <= 76){
         if(positions[1] != -1){
             positions[1] -= 1;
             if(positions[1] < 0)
@@ -573,12 +558,27 @@ void test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pa
         }
     }
 
-    if(x >= 306 && x <= 316 && y >= 132 && y <= 142){
+    if(x >= 296 && x <= 326 && y >= 46 && y <= 76){
         if(positions[0] != -1){
             positions[0] -= 1;
             if(positions[0] < 0)
                 positions[0] += 26;
         }
+    }
+
+    if(x >= 172 && x <= 202 && y >= 122 && y <= 152){
+        if(positions[2] != -1)
+            positions[2] = (positions[2] + 1) % 26;
+    }
+
+    if(x >= 234 && x <= 264 && y >= 122 && y <= 152){
+        if(positions[1] != -1)
+            positions[1] = (positions[1] + 1) % 26;
+    }
+
+    if(x >= 296 && x <= 326 && y >= 122 && y <= 152){
+        if(positions[0] != -1)
+            positions[0] = (positions[0] + 1) % 26;
     }
 
     if(x >= 200 && x <= 229 && y >= 171 && y <= 195){
