@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -g -Wall
-LDFLAGS = -lSDL -lSDL_image -lSDL_ttf -lm
+CFLAGS = -g -Wall -I.\SDL2\include -L.\SDL2\lib
+LDFLAGS = -lm -lmingw32 -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf
 
 Enigma:	display.o machine.o main.o
 	$(CC) $(CFLAGS) display.o machine.o main.o -o Enigma $(LDFLAGS)

@@ -4,9 +4,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include "machine.h"
 #include "display.h"
+
+void display_help (){
+    fprintf(stdout, "\n\n");
+    fprintf(stdout, "Welcome to ENIGMA 3.0!\n");
+    fprintf(stdout, "Program written in C + SDL2 by Yann Droy.\n\n\n");
+
+    fprintf(stdout, "Setting up the machine:\n");
+    fprintf(stdout, " - You need to choose 3 out of 5 rotors by clicking on the 3 rotor selection zones below the down golden arrows.\n");
+    fprintf(stdout, "   It will place randomly the rotors in the machine.\n");
+    fprintf(stdout, " - You can then select the position of the rotors manually by clicking the golden arrows up and above the currently selected letter.\n");
+    fprintf(stdout, " - Finally, you can set up the letter pairs in the plugboard (not a mandatory step).\n");
+    fprintf(stdout, "   To do that, click on a first letter from the TOP row, then click on a second one from the BOTTOM row to create a pair.\n");
+    fprintf(stdout, "   If you want to remove a pair, click again on the same letters, starting from the TOP row still.\n");
+    fprintf(stdout, "   To cancel the creation of a pair after clicking on a first letter, press any key on the keyboard or click anywhere outside of the plugboard.\n");
+    fprintf(stdout, "   You can create up to 10 pairs.\n\n\n");
+
+    fprintf(stdout, "That's it! You can now encode your message by using your keyboard!\n");
+    fprintf(stdout, "The encoded letter will lit up for you to take notes, or you can also find the encoded message on this console.\n");
+    fprintf(stdout, "If you change the settings, the message on the console will start from a new line.\n\n\n");
+
+    fprintf(stdout, "Keyboard help:\n");
+    fprintf(stdout, " - ESCAPE      : Quit the program.\n");
+    fprintf(stdout, " - Keypad ENTER: Set random rotor parameters.\n");
+    fprintf(stdout, " - ENTER       : Reset the rotor positions to A-A-A.\n");
+    fprintf(stdout, " - SPACE       : Reset all rotor parameters.\n");
+    fprintf(stdout, " - BACKPSPACE  : Reset the plugboard pairs.\n");
+    fprintf(stdout, " - LEFT CTRL   : Print the current settings. (Hide them well, though, we do not want the enemy to see those!)\n");
+    fprintf(stdout, " - A-Z         : Encode a letter. It will only work if all settings are ok!\n\n\n\n");
+}
 
 void test_rotation (int* chosen_rotors, int* positions){
     int forward = 0;
@@ -257,7 +286,7 @@ void init_plugboard (char* plugboard, int* nb_pairs){
     *nb_pairs /= 2;
 }
 
-void enigma (SDL_Surface* window, SDL_Surface* background){
+void enigma (SDL_Renderer* renderer, SDL_Texture* background){
     SDL_Event event;
     char rotors[5][26] = {
         {'E','K','M','F','L','G','D','Q','V','Z','N','T','O','W','Y','H','X','U','S','P','A','I','B','R','C','J'},
@@ -272,13 +301,17 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
     int wait = 1;
     int press = 0;
     int nb_pairs = 0;
+    int nb_letters = 0;
+    int click_ok = 0;
 
     init_parameters(chosen_rotors, positions);
     init_plugboard(plugboard, &nb_pairs);
 
     while(wait){
-        display_parameters(window, chosen_rotors, positions);
-        display_plugboard(window, plugboard);
+        display_parameters(renderer, chosen_rotors, positions);
+        display_plugboard(renderer, plugboard);
+
+        SDL_RenderPresent(renderer);
         
         SDL_WaitEvent(&event);
 
@@ -297,7 +330,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('A', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'A')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -305,7 +338,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('B', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'B')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -313,7 +346,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('C', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'C')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -321,7 +354,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('D', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'D')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -329,7 +362,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('E', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'E')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -337,7 +370,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('F', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'F')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -345,7 +378,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('G', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'G')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -353,7 +386,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('H', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'H')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -361,7 +394,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('I', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'I')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -369,7 +402,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('J', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'J')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -377,7 +410,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('K', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'K')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -385,7 +418,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('L', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'L')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -393,7 +426,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('M', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'M')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -401,7 +434,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('N', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'N')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -409,7 +442,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('O', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'O')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -417,7 +450,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('P', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'P')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -425,7 +458,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('Q', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'Q')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -433,7 +466,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('R', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'R')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -441,7 +474,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('S', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'S')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -449,7 +482,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('T', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'T')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -457,7 +490,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('U', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'U')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -465,7 +498,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('V', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'V')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -473,7 +506,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('W', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'W')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -481,7 +514,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('X', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'X')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -489,7 +522,7 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('Y', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'Y')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
@@ -497,15 +530,17 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                 if(!press){
                     c = encode_char('Z', rotors, chosen_rotors, positions, plugboard);
                     if(c != 'Z')
-                        display_letter(window, c);
+                        display_letter(renderer, c, &nb_letters);
                     press = 1;
                 }
                 break;
             case SDLK_SPACE:
                 init_parameters(chosen_rotors, positions);
+                nb_letters = 0;
                 break;
             case SDLK_BACKSPACE:
                 init_plugboard(plugboard, &nb_pairs);
+                nb_letters = 0;
                 break;
             case SDLK_RETURN:
                 if(chosen_rotors[0] != -1)
@@ -514,9 +549,15 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
                     positions[1] = 0;
                 if(chosen_rotors[2] != -1)
                     positions[2] = 0;
+                nb_letters = 0;
                 break;
             case SDLK_KP_ENTER:
                 random_parameters(chosen_rotors, positions);
+                nb_letters = 0;
+                break;
+            case SDLK_LCTRL:
+                writeCurrentParameters(chosen_rotors, positions, plugboard, nb_pairs);
+                nb_letters = 0;
                 break;
             default:
                 break;
@@ -524,12 +565,15 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
             break;
         case SDL_KEYUP:
             if(press){
-                turn_off(window, background, c);
+                turn_off(renderer, background, c);
                 press = 0;
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
-            test_click(chosen_rotors, positions, plugboard, &nb_pairs, event.button.x, event.button.y);
+            click_ok = test_click(chosen_rotors, positions, plugboard, &nb_pairs, event.button.x, event.button.y);
+            if(click_ok){
+                nb_letters = 0;
+            }
             break;
         case SDL_MOUSEBUTTONUP:
             break;
@@ -537,17 +581,19 @@ void enigma (SDL_Surface* window, SDL_Surface* background){
             break;
         }
     }
+
+    fprintf(stdout, "\n");
 }
 
-void test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pairs, int x, int y){
-    srand(time(NULL));
-
+int test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pairs, int x, int y){
+    // Rotors' up arrows
     if(x >= 172 && x <= 202 && y >= 46 && y <= 76){
         if(positions[2] != -1){
             positions[2] -= 1;
             if(positions[2] < 0)
                 positions[2] += 26;
-        }   
+        }
+        return 1;
     }
 
     if(x >= 234 && x <= 264 && y >= 46 && y <= 76){
@@ -556,6 +602,7 @@ void test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pa
             if(positions[1] < 0)
                 positions[1] += 26;
         }
+        return 1;
     }
 
     if(x >= 296 && x <= 326 && y >= 46 && y <= 76){
@@ -564,102 +611,116 @@ void test_click (int* chosen_rotors, int* positions, char* plugboard, int* nb_pa
             if(positions[0] < 0)
                 positions[0] += 26;
         }
+        return 1;
     }
 
+    // Rotors' down arrows
     if(x >= 172 && x <= 202 && y >= 122 && y <= 152){
         if(positions[2] != -1)
             positions[2] = (positions[2] + 1) % 26;
+        return 1;
     }
 
     if(x >= 234 && x <= 264 && y >= 122 && y <= 152){
         if(positions[1] != -1)
             positions[1] = (positions[1] + 1) % 26;
+        return 1;
     }
 
     if(x >= 296 && x <= 326 && y >= 122 && y <= 152){
         if(positions[0] != -1)
             positions[0] = (positions[0] + 1) % 26;
+        return 1;
     }
 
+    // Rotor selection
     if(x >= 200 && x <= 229 && y >= 171 && y <= 195){
+        srand(time(NULL));
         positions[2] = rand() % 26;
         do{
             chosen_rotors[2] = (chosen_rotors[2] + 1) % 5;
         }while(chosen_rotors[2] == chosen_rotors[1] || chosen_rotors[0] == chosen_rotors[2]);
+        return 1;
     }
 
     if(x >= 262 && x <= 291 && y >= 171 && y <= 195){
+        srand(time(NULL));
         positions[1] = rand() % 26;
         do{
             chosen_rotors[1] = (chosen_rotors[1] + 1) % 5;
         }while(chosen_rotors[1] == chosen_rotors[0] || chosen_rotors[1] == chosen_rotors[2]);
+        return 1;
     }
 
     if(x >= 324 && x <= 353 && y >= 171 && y <= 195){
+        srand(time(NULL));
         positions[0] = rand() % 26;
         do{
             chosen_rotors[0] = (chosen_rotors[0] + 1) % 5;
         }while(chosen_rotors[0] == chosen_rotors[1] || chosen_rotors[2] == chosen_rotors[0]);
+        return 1;
     }
 
+    // Plugboard
+    if(x >= 18 && x <= 31 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'A', nb_pairs); return 1;}
+    if(x >= 40 && x <= 53 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'B', nb_pairs); return 1;}
+    if(x >= 62 && x <= 75 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'C', nb_pairs); return 1;}
+    if(x >= 84 && x <= 97 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'D', nb_pairs); return 1;}
+    if(x >= 106 && x <= 119 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'E', nb_pairs); return 1;}
+    if(x >= 128 && x <= 141 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'F', nb_pairs); return 1;}
+    if(x >= 150 && x <= 163 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'G', nb_pairs); return 1;}
+    if(x >= 172 && x <= 185 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'H', nb_pairs); return 1;}
+    if(x >= 194 && x <= 207 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'I', nb_pairs); return 1;}
+    if(x >= 216 && x <= 229 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'J', nb_pairs); return 1;}
+    if(x >= 238 && x <= 251 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'K', nb_pairs); return 1;}
+    if(x >= 260 && x <= 273 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'L', nb_pairs); return 1;}
+    if(x >= 282 && x <= 295 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'M', nb_pairs); return 1;}
+    if(x >= 304 && x <= 317 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'N', nb_pairs); return 1;}
+    if(x >= 326 && x <= 339 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'O', nb_pairs); return 1;}
+    if(x >= 348 && x <= 361 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'P', nb_pairs); return 1;}
+    if(x >= 370 && x <= 383 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'Q', nb_pairs); return 1;}
+    if(x >= 392 && x <= 405 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'R', nb_pairs); return 1;}
+    if(x >= 414 && x <= 427 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'S', nb_pairs); return 1;}
+    if(x >= 436 && x <= 449 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'T', nb_pairs); return 1;}
+    if(x >= 458 && x <= 471 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'U', nb_pairs); return 1;}
+    if(x >= 480 && x <= 493 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'V', nb_pairs); return 1;}
+    if(x >= 502 && x <= 515 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'W', nb_pairs); return 1;}
+    if(x >= 524 && x <= 537 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'X', nb_pairs); return 1;}
+    if(x >= 546 && x <= 559 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'Y', nb_pairs); return 1;}
+    if(x >= 568 && x <= 581 && y >= 607 && y <= 625){
+        change_plugboard(plugboard, 'Z', nb_pairs); return 1;}
 
-    if(x >= 18 && x <= 31 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'A', nb_pairs);
-    if(x >= 40 && x <= 53 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'B', nb_pairs);
-    if(x >= 62 && x <= 75 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'C', nb_pairs);
-    if(x >= 84 && x <= 97 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'D', nb_pairs);
-    if(x >= 106 && x <= 119 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'E', nb_pairs);
-    if(x >= 128 && x <= 141 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'F', nb_pairs);
-    if(x >= 150 && x <= 163 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'G', nb_pairs);
-    if(x >= 172 && x <= 185 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'H', nb_pairs);
-    if(x >= 194 && x <= 207 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'I', nb_pairs);
-    if(x >= 216 && x <= 229 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'J', nb_pairs);
-    if(x >= 238 && x <= 251 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'K', nb_pairs);
-    if(x >= 260 && x <= 273 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'L', nb_pairs);
-    if(x >= 282 && x <= 295 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'M', nb_pairs);
-    if(x >= 304 && x <= 317 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'N', nb_pairs);
-    if(x >= 326 && x <= 339 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'O', nb_pairs);
-    if(x >= 348 && x <= 361 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'P', nb_pairs);
-    if(x >= 370 && x <= 383 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'Q', nb_pairs);
-    if(x >= 392 && x <= 405 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'R', nb_pairs);
-    if(x >= 414 && x <= 427 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'S', nb_pairs);
-    if(x >= 436 && x <= 449 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'T', nb_pairs);
-    if(x >= 458 && x <= 471 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'U', nb_pairs);
-    if(x >= 480 && x <= 493 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'V', nb_pairs);
-    if(x >= 502 && x <= 515 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'W', nb_pairs);
-    if(x >= 524 && x <= 537 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'X', nb_pairs);
-    if(x >= 546 && x <= 559 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'Y', nb_pairs);
-    if(x >= 568 && x <= 581 && y >= 607 && y <= 625)
-        change_plugboard(plugboard, 'Z', nb_pairs);
+    return 0;
 }
 
 void change_plugboard (char* plugboard, char c, int* nb_pairs){
     SDL_Event event;
-    char click;
+    char click = -1;
     int wait = 1;
     int i, x, y;
   
@@ -729,10 +790,10 @@ void change_plugboard (char* plugboard, char c, int* nb_pairs){
             else if(x >= 568 && x <= 581 && y >= 664 && y <= 679)
                 click = 'Z';
 
-            if(plugboard[click - 'A'] == click && plugboard[c - 'A'] == c){
+            if(click != -1 && plugboard[click - 'A'] == click && plugboard[c - 'A'] == c){
                 plugboard[c - 'A'] = click;
                 plugboard[click - 'A'] = c;
-            }else if(plugboard[click - 'A'] == c && plugboard[c - 'A'] == click){
+            }else if(click != -1 && plugboard[click - 'A'] == c && plugboard[c - 'A'] == click){
                 plugboard[c - 'A'] = c;
                 plugboard[click - 'A'] = click;
             }
